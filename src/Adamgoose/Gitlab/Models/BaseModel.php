@@ -5,6 +5,7 @@ use ReflectionMethod;
 use Adamgoose\Gitlab\Client;
 use Illuminate\Support\Contracts\JsonableInterface;
 use Illuminate\Support\Contracts\ArrayableInterface;
+use Illuminate\Support\Collection;
 
 abstract class BaseModel extends Client implements JsonableInterface, ArrayableInterface {
 
@@ -29,6 +30,23 @@ abstract class BaseModel extends Client implements JsonableInterface, ArrayableI
     $this->attributes = $attributes;
     $this->parent = $parent;
   }
+
+  /**
+   * Lookup by ID
+   * @return BaseModel     Model Instance
+   */
+  public static function all()
+  {
+    $model = 'Adamgoose\Gitlab\Models\\'.class_basename(get_called_class());
+    $instances = with(new Client)->fetch($model::$path);
+    $collection = new Collection;
+    foreach($instances as $instance){
+      $collection->push(new $model($instance));
+    }
+
+    return $collection;
+  }
+
 
   /**
    * Lookup by ID
